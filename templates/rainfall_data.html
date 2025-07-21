@@ -1,0 +1,224 @@
+{% extends "header.html" %}
+{% block content %}
+
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rainfall Data - Qatar</title>
+
+  <!-- Choices.js CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
+  />
+
+  <style>
+    :root {
+      --qic-red: #7a1e26;
+      --qic-light-red: #f3d7d9;
+      --qic-bg: #f8f5f5;
+      --qic-dark-red: #4c1218;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--qic-bg);
+      color: var(--qic-dark-red);
+      padding: 20px;
+    }
+
+    h1 {
+      color: var(--qic-red);
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: var(--qic-red);
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--qic-light-red);
+    }
+
+    .dropdown {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .dropdown label {
+      font-weight: bold;
+    }
+
+    .choices {
+      width: 220px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    button#filter-btn {
+      background-color: var(--qic-red);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      height: 38px;
+    }
+
+    button#filter-btn:hover {
+      background-color: var(--qic-dark-red);
+    }
+
+    #selected-location {
+      margin-top: 15px;
+      font-weight: bold;
+      color: var(--qic-red);
+    }
+  </style>
+</head>
+<body>
+  <h1>Rainfall Data by Year and Station</h1>
+
+  <div class="dropdown">
+    <label for="station">Station:</label>
+    <select id="station" multiple>
+      {% for station in stations %}
+        <option value="{{ station }}">{{ station }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="year">Year:</label>
+    <select id="year" multiple>
+      {% for year in years %}
+        <option value="{{ year }}">{{ year }}</option>
+      {% endfor %}
+    </select>
+
+    <button id="filter-btn">Filter</button>
+  </div>
+
+  <p id="selected-location">Filtered Stations: All Stations</p>
+
+  <table id="rainfall-table">
+    <thead>
+      <tr>
+        <th data-station="year">Year</th>
+        {% for station in stations %}
+          <th data-station="{{ station }}">{{ station }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for year in years %}
+        <tr data-year="{{ year }}">
+          <td>{{ year }}</td>
+          {% for station in stations %}
+            <td data-station="{{ station }}">{{ rainfall_lookup|get_value:year|get_value:station }} mm</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Choices.js Script -->
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const stationChoice = new Choices("#station", {
+        removeItemButton: true,
+        placeholderValue: "Select stations",
+        searchPlaceholderValue: "Search stations",
+      });
+
+      const yearChoice = new Choices("#year", {
+        removeItemButton: true,
+        placeholderValue: "Select years",
+        searchPlaceholderValue: "Search years",
+      });
+
+      const filterBtn = document.getElementById("filter-btn");
+      const table = document.getElementById("rainfall-table");
+      const tbody = table.querySelector("tbody");
+      const thead = table.querySelector("thead");
+      const selectedLocationEl = document.getElementById("selected-location");
+
+      filterBtn.addEventListener("click", () => {
+        const selectedStations = stationChoice.getValue(true); // Array of selected stations
+        const selectedYears = yearChoice.getValue(true); // Array of selected years
+
+        // Show/hide columns (stations)
+        const headerCells = thead.querySelectorAll("th[data-station]");
+        headerCells.forEach((th) => {
+          const station = th.getAttribute("data-station");
+          if (station === "year") return;
+
+          if (selectedStations.length === 0 || selectedStations.includes(station)) {
+            th.style.display = "";
+          } else {
+            th.style.display = "none";
+          }
+        });
+
+        // Show/hide data cells per station
+        tbody.querySelectorAll("tr").forEach((tr) => {
+          const tds = tr.querySelectorAll("td[data-station]");
+          tds.forEach((td) => {
+            const station = td.getAttribute("data-station");
+            if (selectedStations.length === 0 || selectedStations.includes(station)) {
+              td.style.display = "";
+            } else {
+              td.style.display = "none";
+            }
+          });
+        });
+
+        // Show/hide rows per year
+        tbody.querySelectorAll("tr").forEach((tr) => {
+          const year = tr.getAttribute("data-year");
+          if (selectedYears.length === 0 || selectedYears.includes(year)) {
+            tr.style.display = "";
+          } else {
+            tr.style.display = "none";
+          }
+        });
+
+        // Update selected stations text
+        if (selectedStations.length > 0) {
+          selectedLocationEl.textContent =
+            "Filtered Stations: " + selectedStations.join(", ");
+        } else {
+          selectedLocationEl.textContent = "Filtered Stations: All Stations";
+        }
+      });
+
+      // Trigger initial filter to show everything
+      filterBtn.click();
+    });
+  </script>
+</body>
+</html>
+{% endblock %}
