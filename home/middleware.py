@@ -10,6 +10,7 @@ class TrafficDataFetchMiddleware:
         # Fetch data only once a day
         last_fetch = cache.get('last_traffic_sync')
         if not last_fetch or (datetime.datetime.now() - last_fetch).days >= 1:
+            
             traffic_accidents_db_save()
             cache.set('last_traffic_sync', datetime.datetime.now(), 86400)
 

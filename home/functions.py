@@ -3,6 +3,7 @@ import pandas as pd
 from collections import OrderedDict
 from . import models
 
+
 def traffic_accidents_db_save():
     url = "https://www.data.gov.qa/api/explore/v2.1/catalog/datasets/number-of-deaths-and-injuries-from-traffic-accidents/records"
     limit = 100

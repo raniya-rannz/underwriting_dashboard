@@ -28,3 +28,10 @@ db.sqlite3
 
 # Firebase
 firebase/
+
+__pycache__/
+*.pyc
+.env
+.git
+*.md
+tests/
