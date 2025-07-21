@@ -1,0 +1,30 @@
+# Include specific directories and files
+/.idea/
+
+# Exclude all .pyc files in migrations and __pycache__ directories, including nested directories
+**/migrations/**/*.pyc
+**/__pycache__/**/*.pyc
+
+# Exclude all other .pyc files
+**/*.pyc
+
+# Explicitly exclude specific files within excluded directories, if needed
+**/migrations/__init__.pyc
+**/__pycache__/__init__.pyc
+
+#Exclude .env files
+.env
+
+
+#local files
+.vscode/
+
+#Celery Files
+*.log
+celerybeat-schedule
+
+
+db.sqlite3
+
+# Firebase
+firebase/

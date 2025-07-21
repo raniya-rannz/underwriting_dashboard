@@ -5,5 +5,4 @@ urlpatterns=[
     path('',views.home,name=''),
     path('traffic_accidents',views.traffic_accidents,name='traffic_accidents'),
     path('rainfall_data',views.rainfall_data,name='rainfall_data'),
-    path('realestate_data/',views.realestate_data,name='realestate_data'),
 ]

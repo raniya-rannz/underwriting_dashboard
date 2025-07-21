@@ -49,6 +49,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'home.middleware.TrafficDataFetchMiddleware',
+    'home.middleware.RainfallDataMiddleware'
 ]
 
 ROOT_URLCONF = 'InsuranceUnderwriting.urls'

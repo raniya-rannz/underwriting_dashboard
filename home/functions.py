@@ -1,8 +1,9 @@
 import requests
 import pandas as pd
 from collections import OrderedDict
+from . import models
 
-def traffic_accidents_get():
+def traffic_accidents_db_save():
     url = "https://www.data.gov.qa/api/explore/v2.1/catalog/datasets/number-of-deaths-and-injuries-from-traffic-accidents/records"
     limit = 100
     offset = 0
@@ -38,10 +39,23 @@ def traffic_accidents_get():
     # Sort by year descending
     df = df.sort_values(by='year', ascending=False).reset_index(drop=True)
 
+    save_traffic_db = [
+    models.TrafficAccident.objects.create(
+        year=int(row['year']),
+        result_of_the_accident=row['result_of_the_accident'],
+        number_of_people=int(row['number_of_people']),
+        result_of_the_accident_ar=row['result_of_the_accident_ar']
+    )
+    for row in df.to_dict(orient='records')
+    if not models.TrafficAccident.objects.filter(
+        year=int(row['year']),
+        result_of_the_accident=row['result_of_the_accident']
+    ).exists()
+    ]   
     return df
 
 
-def rainfall_data_get():
+def rainfall_data_db_save():
     url = "https://www.data.gov.qa/api/explore/v2.1/catalog/datasets/rainfall-average-mm-at-selected-monitoring-stations-in-qatar/records"
     response = requests.get(url)
     response.raise_for_status()
@@ -49,41 +63,38 @@ def rainfall_data_get():
     records = data.get('results', [])
 
     df = pd.DataFrame(records)
+
     df_long = df.melt(id_vars=['station'], var_name='year', value_name='rainfall_mm')
     df_long['year'] = pd.to_numeric(df_long['year'], errors='coerce')
     df_long['rainfall_mm'] = pd.to_numeric(df_long['rainfall_mm'], errors='coerce')
     df_long = df_long.dropna(subset=['year', 'rainfall_mm'])
     grouped_df = df_long.groupby(['station', 'year'], as_index=False)['rainfall_mm'].mean()
     grouped_df = grouped_df.sort_values(by=['station', 'year'], ascending=[True, False])
+
+    save_rainfall_db = [
+        models.RainfallRecord.objects.create(
+            station=row['station'],
+            year=int(row['year']),
+            rainfall_mm=float(row['rainfall_mm'])
+        )
+        for _, row in grouped_df.iterrows()
+        if not models.RainfallRecord.objects.filter(station=row['station'], year=int(row['year'])).exists()
+    ]
     return grouped_df
 
-def real_estate_get(limit=1000):
-    API_URL = "https://www.data.gov.qa/api/explore/v2.1/catalog/datasets/weekly-real-estate-newsletter/records"
-    all_results = []
-    offset = 0
-    limit = 100
 
-    while True:
-        response = requests.get(API_URL, params={"limit": limit, "offset": offset})
-        if response.status_code != 200:
-            print(f"Error fetching at offset {offset}: {response.status_code}")
-            break
+def traffic_accidents_get():
+    data=models.TrafficAccident.objects.all().values(
+        'year', 'result_of_the_accident', 'number_of_people', 'result_of_the_accident_ar'
+    )
+    df = pd.DataFrame(list(data))
+    return df
 
-        batch = response.json().get("results", [])
-        if not batch:
-            break  # No more data
-
-        all_results.extend(batch)
-        offset += limit
-
-    df = pd.DataFrame(all_results)
-
-    if 'municipality_name' not in df.columns:
-        print("Field 'municipality_name' missing.")
-        return {}
-
-    df = df.dropna(subset=['municipality_name'])
-
-    grouped = df.groupby("municipality_name")
-    result = {muni: group.to_dict(orient="records") for muni, group in grouped}
-    return result
+def rainfall_data_get():
+    data = models.RainfallRecord.objects.all().values(
+        'station', 'year', 'rainfall_mm'
+    )
+    df = pd.DataFrame(list(data))
+    if not df.empty:
+        df['rainfall_mm'] = df['rainfall_mm'].astype(float)
+    return df
