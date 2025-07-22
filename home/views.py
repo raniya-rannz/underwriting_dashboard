@@ -13,6 +13,7 @@ from . import serializers
 from rest_framework.response import Response 
 from drf_spectacular.types import OpenApiTypes
 from . import models
+from rest_framework.permissions import AllowAny
 
 # Create your views here.
 
@@ -61,6 +62,8 @@ def rainfall_data(request):
 ###########################
 
 class UnderWritingRiskGet(GenericViewSet):
+    authentication_classes = []  # Disable authentication
+    permission_classes = []      # Allow unrestricted access
     pagination_class = LimitOffsetPagination
 
     @extend_schema(
