@@ -38,6 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
+    'rest_framework_swagger',
     'home',
 ]
 
@@ -82,6 +86,27 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'DEFAULT_PAGINATION_CLASS':['rest_framework.pagination.LimitOffsetPagination',]
+    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.LimitOffsetPagination'
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Underwriting Dashboard API',
+    'DESCRIPTION': 'APIs for underwriting dashboard',
+    'VERSION': '1.0.0',
+    'SERVE_AUTHENTICATION': None,
+    # OTHER SETTINGS
+    'DISABLE_ERRORS_AND_WARNINGS': False,
+    'COMPONENT_SPLIT_REQUEST': True,
 }
 
 
