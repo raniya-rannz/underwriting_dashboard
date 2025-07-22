@@ -74,8 +74,8 @@ class UnderWritingRiskGet(GenericViewSet):
         """,
         parameters=[
 
-        OpenApiParameter(name='limit', required=False, type=int,location=OpenApiParameter.QUERY),
-        OpenApiParameter(name='offset', required=False, type=int,location=OpenApiParameter.QUERY),
+        OpenApiParameter(name='limit', required=True, type=int,location=OpenApiParameter.QUERY),
+        OpenApiParameter(name='offset', required=True, type=int,location=OpenApiParameter.QUERY),
         OpenApiParameter(name="type", description="Filter accidents by type", required=False, type=OpenApiTypes.STR),
         OpenApiParameter(name="year", description="Filter accidents by year", required=False, type=OpenApiTypes.STR),
         ],
@@ -112,8 +112,8 @@ class UnderWritingRiskGet(GenericViewSet):
         """,
         parameters=[
 
-        OpenApiParameter(name='limit', required=False, type=int,location=OpenApiParameter.QUERY),
-        OpenApiParameter(name='offset', required=False, type=int,location=OpenApiParameter.QUERY),
+        OpenApiParameter(name='limit', required=True, type=int,location=OpenApiParameter.QUERY),
+        OpenApiParameter(name='offset', required=True, type=int,location=OpenApiParameter.QUERY),
         OpenApiParameter(name="station", description="Filter rainfall by station", required=False, type=OpenApiTypes.STR),
         OpenApiParameter(name="year", description="Filter rainfall by year", required=False, type=OpenApiTypes.STR),
         ],
